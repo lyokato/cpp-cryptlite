@@ -34,7 +34,7 @@ std::string sha1hex = sha1::hash_hex("foobar");
 std::string sha1base64 = sha1::hash_base64("foobar");
 
 // sha256 hash
-uint8_t sha256digest[sha1::HASH_SIZE];
+uint8_t sha256digest[sha256::HASH_SIZE];
 sha256::hash("foobar", sha256digest);
 
 // hex-formatted sha256 hash
