@@ -1,0 +1,26 @@
+#!/usr/bin/env perl
+
+eval 'exec /usr/bin/perl -w -S $0 ${1+"$@"}' if 0;
+
+use strict;
+use warnings;
+
+use FindBin;
+
+# check build directory
+my $build_dir = "$FindBin::Bin/../xcode";
+if (-e $build_dir) {
+    system("rm -rf $build_dir");
+}
+mkdir($build_dir, 0755) or die $!;
+chdir "$FindBin::Bin/../xcode" or die $!;
+
+# build cmake command
+my $command = "cmake -GXcode ..";
+print $command;
+print "\n";
+system($command);
+#system("cmake -DCMAKE_IS_EXPERIMENTAL=YES_I_KNOW ..");
+
+1;
+__END__

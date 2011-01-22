@@ -1,0 +1,19 @@
+#!/usr/bin/env perl
+
+eval 'exec /usr/bin/perl -w -S $0 ${1+"$@"}' if 0;
+
+use strict;
+use warnings;
+
+use FindBin;
+
+my $build_dir = "$FindBin::Bin/../build";
+unless (-e $build_dir) {
+    return;
+}
+print "Removing all files under $build_dir\n";
+system("rm -rf $build_dir");
+mkdir($build_dir, 0755) or die $!;
+print "Completed.\n";
+
+1;

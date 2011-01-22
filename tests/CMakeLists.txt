@@ -1,0 +1,10 @@
+INCLUDE_DIRECTORIES(${cryptlite_SOURCE_DIR}/include)
+INCLUDE_DIRECTORIES(${cryptlite_SOURCE_DIR}/gtest/include)
+
+FILE(GLOB test_files ${cryptlite_SOURCE_DIR}/tests/*Test.cpp)
+FOREACH(filename ${test_files})
+    GET_FILENAME_COMPONENT(testname ${filename} NAME_WE)
+    ADD_EXECUTABLE(${testname} ${filename})
+    TARGET_LINK_LIBRARIES(${testname} gtest gtest-main)
+    ADD_TEST(${testname} "${cryptlite_BINARY_DIR}/tests/${testname}")
+ENDFOREACH()

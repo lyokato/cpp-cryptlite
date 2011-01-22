@@ -1,0 +1,32 @@
+#!/usr/bin/env perl
+
+eval 'exec /usr/bin/perl -w -S $0 ${1+"$@"}' if 0;
+
+use strict;
+use warnings;
+
+use FindBin;
+use File::Find;
+use IO::Dir;
+
+# build cmake command
+my $command = "cmake .. -DCMAKE_BUILD_TYPE=Release";
+
+# check build directory
+my $build_dir = "$FindBin::Bin/../build";
+unless (-e $build_dir) {
+    mkdir($build_dir, 0755) or die $!;
+}
+chdir $build_dir or die $!;
+print $command, "\n";
+system($command);
+print "make\n";
+system("make");
+
+print "sudo make install\n";
+system("sudo make install");
+
+1;
+__END__
+
+=cut

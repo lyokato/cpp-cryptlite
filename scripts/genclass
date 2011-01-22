@@ -1,0 +1,237 @@
+#!/usr/bin/env perl
+
+eval 'exec /usr/bin/perl -w -S $0 ${1+"$@"}' if 0;
+
+use strict;
+use warnings;
+
+use Getopt::Long;
+use Pod::Usage;
+
+my $help = @ARGV == 0;
+
+my ($name);
+my $source  = 1;
+my $test    = 1;
+my $fixture = 0;
+
+my %opt = (
+    'help|?'   => \$help,
+    'name|n=s' => \$name,
+    'source!'  => \$source,
+    'test!'    => \$test,
+    'fixture!' => \$fixture,
+);
+GetOptions(%opt);
+
+pod2usage(1) if $help;
+pod2usage(1) unless $name;
+
+my $generator = CPP::Package::Starter::Class->new(
+    name        => $name,
+    fixture     => $fixture,
+    need_source => $source,
+    need_test   => $test,
+);
+
+$generator->gen();
+
+package CPP::Package::Starter::Class;
+
+use IO::File;
+use File::Spec ();
+use FindBin;
+
+use constant PACKAGE_NAME => q{cryptlite};
+
+sub new {
+    my ($class, %args) = @_;
+    my $self = bless {
+        name        => 'MyClass',
+        fixture     => 1,
+        need_source => 1, 
+        need_test   => 1, 
+        %args}, $class;
+    return $self;
+}
+
+sub license_text {
+    return q{/*
+The MIT License
+
+Copyright (c) 2011 lyo.kato@gmail.com
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+THE SOFTWARE.
+*/
+
+};
+}
+
+sub _mkfile {
+    my ($self, $path, $content) = @_;
+    unless (-e $path && -f _) {
+        my $fh = IO::File->new($path, "w")
+            or die "Couldn't write file $path";
+        $fh->print($$content);
+        $fh->close();
+    }
+    print "Created file: ";
+    print $path, "\n";
+}
+
+sub gen {
+    my $self = shift;
+    $self->gen_header();
+    $self->gen_source() if $self->{need_source};
+    $self->gen_test()   if $self->{need_test};
+}
+
+sub gen_header {
+    my $self = shift;
+    my $path = File::Spec->catfile($FindBin::Bin, q{..}, q{include}, PACKAGE_NAME, $self->{name}.".h");
+    my $template = <<'EOF';
+#ifndef _%s_%s_H_
+#define _%s_%s_H_
+
+namespace %s {
+
+class %s {
+
+}; // end of class
+
+}  // end of namespace
+
+#endif
+EOF
+    my $file = $self->license_text() . sprintf($template,
+        uc PACKAGE_NAME, uc $self->{name},
+        uc PACKAGE_NAME, uc $self->{name},
+        PACKAGE_NAME,
+        $self->{name},
+    );
+    $self->_mkfile($path, \$file);
+}
+
+sub gen_source {
+    my $self = shift;
+    my $path = File::Spec->catfile($FindBin::Bin, q{..}, q{src}, $self->{name}.".cpp");
+    my $template = <<'EOF';
+#include "%s/%s.h"
+
+namespace %s {
+
+}  // end of namespace
+
+EOF
+    my $file = $self->license_text() . sprintf($template,
+        PACKAGE_NAME, $self->{name},
+        PACKAGE_NAME);
+    $self->_mkfile($path, \$file);
+}
+
+sub gen_test {
+    my $self = shift;
+    my $path = File::Spec->catfile($FindBin::Bin, q{..}, q{tests}, $self->{name}."Test.cpp");
+    my $file;
+    if ($self->{fixture}) {
+
+        my $template = <<'EOF';
+#include "%s/%s.h"
+#include <gtest/gtest.h>
+
+namespace {
+
+class %sTest : public testing::Test {
+  protected:
+    virtual void SetUp() { };
+    virtual void TearDown() { };
+};
+
+};
+
+TEST_F(%sTest, helloWorld)
+{
+    EXPECT_EQ("Hello World", "Hello World");
+}
+
+EOF
+        $file = sprintf($template,
+            PACKAGE_NAME, $self->{name}, 
+            $self->{name},
+            $self->{name},
+        );
+    } else {
+        my $template = <<'EOF';
+#include "%s/%s.h"
+#include <gtest/gtest.h>
+
+TEST(%sTest, helloWorld)
+{
+    EXPECT_EQ("Hello World", "Hello World");
+}
+
+EOF
+        $file = sprintf($template,
+            PACKAGE_NAME, $self->{name},
+            $self->{name});
+    }
+    $self->_mkfile($path, \$file);
+}
+
+1;
+__END__
+
+=head1 NAME
+
+genclass - This program generartes C++ header, source, and test templates.
+
+=head1 SYNOPSIS
+
+    genclass [options]
+
+Example:
+
+    ./scripts/genclass --name Foo
+    ./scripts/genclass --name Bar --nosource
+    ./scripts/genclass --name Buz --notest
+
+Options:
+
+    -name      name of a class
+    -nosource  if this flag is on, it doesn't generate source file
+    -notest    if this flag is on, it doesn't generate test file
+    -fixture   use fixture test. see googletest's document.
+
+=head1 DESCRIPTION
+
+Generate C++ package template.
+It is based on CMake and googletest.
+
+=head1 AUTHOR
+
+Lyo Kato, E<lt>lyo.kato@gmail.comE<gt>
+
+=head1 COPYRIGHT AND LICENSE
+
+Copyright 2010 Lyo Kato. All rights reserved.
+
+This library is free software. You can redistribute it and/or modify it under
+the same terms as perl itself.
+
+=cut

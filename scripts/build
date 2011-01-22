@@ -1,0 +1,84 @@
+#!/usr/bin/env perl
+
+eval 'exec /usr/bin/perl -w -S $0 ${1+"$@"}' if 0;
+
+use strict;
+use warnings;
+
+use FindBin;
+use File::Find;
+use Getopt::Long;
+use Pod::Usage;
+use IO::Dir;
+
+my $help    = 0;
+my $release = 0;
+my $prefix;
+
+my %opt = (
+    'help|?'     => \$help,
+    'release|r!' => \$release,
+    'prefix|p=s' => \$prefix,
+);
+GetOptions(%opt);
+
+pod2usage(1) if $help;
+
+# build cmake command
+my $command = "cmake ..";
+$command .= sprintf(q{ -DCMAKE_BUILD_TYPE=%s},
+    $release ? 'Release' : 'Debug');
+if ($prefix) {
+    $command .= sprintf(' -DCMAKE_INSTALL_PREFIX=%s',
+        $prefix);
+}
+
+# check build directory
+my $build_dir = "$FindBin::Bin/../build";
+unless (-e $build_dir) {
+    mkdir($build_dir, 0755) or die $!;
+}
+chdir $build_dir or die $!;
+print $command, "\n";
+system($command);
+print "make\n";
+system("make");
+
+1;
+__END__
+=head1 NAME
+
+build - This program helps your building workaround.
+
+=head1 SYNOPSIS
+
+    build [options]
+
+Example:
+
+    ./scripts/build --release
+    ./scripts/build --prefix /usr/local
+
+Options:
+
+    -prefix  (p) install directory
+    -release (r) if this flag is on, makefile would be generated for Release build. If not, that would be Debug build.
+
+=head1 DESCRIPTION
+
+This helps your building workaround.
+If you just want to test, think about executing './scripts/test' instead.
+If you just want to install, think about executing './scripts/install' instead.
+
+=head1 AUTHOR
+
+Lyo Kato, E<lt>lyo.kato@gmail.comE<gt>
+
+=head1 COPYRIGHT AND LICENSE
+
+Copyright 2010 Lyo Kato. All rights reserved.
+
+This library is free software. You can redistribute it and/or modify it under
+the same terms as perl itself.
+
+=cut
