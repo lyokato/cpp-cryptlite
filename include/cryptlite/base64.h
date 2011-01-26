@@ -34,10 +34,10 @@ class base64 : public boost::noncopyable {
  public:
   inline static std::string encode(const std::string& s)
   {
-      return encode(reinterpret_cast<const uint8_t*>(s.c_str()), s.size());
+      return encode(reinterpret_cast<const unsigned char*>(s.c_str()), s.size());
   }
 
-  static std::string encode(const uint8_t* s, std::size_t size) 
+  static std::string encode(const unsigned char* s, std::size_t size) 
   {
     std::ostringstream os;
     uint8_t c1, c2, c3;
@@ -68,6 +68,53 @@ class base64 : public boost::noncopyable {
     return os.str();
   }
 
+  template <typename T>
+  static void decode(const std::string& s, T& dest)
+  {
+    char c1, c2, c3, c4;
+    std::size_t size = s.size();
+    int i= 0;
+
+    while (i < size) {
+        do {
+            c1 = dectable[s[i++] & 0xff];
+        } while (i < size && c1 == -1);
+        if (c1 == -1)
+            break;
+
+        do {
+            c2 = dectable[s[i++] & 0xff];
+        } while (i < size && c2 == -1);
+        if (c2 == -1)
+            break;
+
+        dest.push_back(static_cast<unsigned char>(((c1 << 2)|((c2 & 0x30) >> 4) & 0xff)));
+
+        do {
+            c3 = s[i++] & 0xff;
+            if (c3 == 61)
+                return;
+            c3 = dectable[c3];
+        } while (i < size && c3 == -1);
+        if (c3 == -1)
+            break;
+
+        dest.push_back(static_cast<unsigned char>((((c2 & 0xf) << 4)|((c3 & 0x3c) >> 2) & 0xff)));
+
+        do {
+            c4 = s[i++] & 0xff;
+            if (c4 == 61)
+                return;
+            c4 = dectable[c4];
+        } while (i < size && c4 == -1);
+        if (c4 == -1)
+            break;
+
+        dest.push_back(static_cast<unsigned char>((((c3 & 0x03) << 6)| c4) & 0xff));
+    }
+  }
+
+  /*
   static std::string decode(const std::string& s)
   {
     std::ostringstream os;
@@ -115,6 +162,7 @@ class base64 : public boost::noncopyable {
 
     return os.str();
   }
+  */
 
  private:
   static const char enctable[65];
