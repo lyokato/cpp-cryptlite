@@ -75,6 +75,10 @@ class base64 : public boost::noncopyable {
     std::size_t size = s.size();
     int i= 0;
 
+    dest.reserve(size);
+    // dest.reserve(std::ceil(size * 3 / 4));
+    dest.clear();
+
     while (i < size) {
         do {
             c1 = dectable[s[i++] & 0xff];
@@ -113,56 +117,6 @@ class base64 : public boost::noncopyable {
         dest.push_back(static_cast<unsigned char>((((c3 & 0x03) << 6)| c4) & 0xff));
     }
   }
-
-  /*
-  static std::string decode(const std::string& s)
-  {
-    std::ostringstream os;
-    char c1, c2, c3, c4;
-    std::size_t size = s.size();
-    int i= 0;
-
-    while (i < size) {
-        do {
-            c1 = dectable[s[i++] & 0xff];
-        } while (i < size && c1 == -1);
-        if (c1 == -1)
-            break;
-
-        do {
-            c2 = dectable[s[i++] & 0xff];
-        } while (i < size && c2 == -1);
-        if (c2 == -1)
-            break;
-
-        os << static_cast<char>(((c1 << 2)|((c2 & 0x30) >> 4) & 0xff));
-
-        do {
-            c3 = s[i++] & 0xff;
-            if (c3 == 61)
-                return os.str();
-            c3 = dectable[c3];
-        } while (i < size && c3 == -1);
-        if (c3 == -1)
-            break;
-
-        os << static_cast<char>((((c2 & 0xf) << 4)|((c3 & 0x3c) >> 2) & 0xff));
-
-        do {
-            c4 = s[i++] & 0xff;
-            if (c4 == 61)
-                return os.str();
-            c4 = dectable[c4];
-        } while (i < size && c4 == -1);
-        if (c4 == -1)
-            break;
-
-        os << static_cast<char>((((c3 & 0x03) << 6)| c4) & 0xff);
-    }
-
-    return os.str();
-  }
-  */
 
  private:
   static const char enctable[65];
