@@ -26,6 +26,7 @@ THE SOFTWARE.
 #define _CRYPTLITE_BASE64_H_
 #include <string>
 #include <sstream>
+#include <cmath>
 #include <boost/utility.hpp>
 
 namespace cryptlite {
@@ -75,9 +76,14 @@ class base64 : public boost::noncopyable {
     std::size_t size = s.size();
     int i= 0;
 
-    dest.reserve(size);
-    // dest.reserve(std::ceil(size * 3 / 4));
     dest.clear();
+    std::size_t reserved = std::ceil(size * 3 / 4);
+    unsigned short mod     = reserved % 4;
+    unsigned short padding = (mod == 0) ? 0 : (4 - mod)
+    dest.reserve(reserved + padding);
+    /*
+    dest.reserve(size);
+    */
 
     while (i < size) {
         do {
