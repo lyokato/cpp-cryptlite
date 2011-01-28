@@ -91,7 +91,7 @@ class sha256 {
     sha256 ctx;
     ctx.input(reinterpret_cast<const uint8_t*>(s.c_str()), s.size());
     ctx.result(digest);
-    return base64::encode(digest, HASH_SIZE);
+    return base64::encode_from_array(digest, HASH_SIZE);
   }
 
   sha256() 
