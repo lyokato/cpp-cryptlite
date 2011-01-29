@@ -30,6 +30,7 @@ THE SOFTWARE.
 #include <boost/utility.hpp>
 #include <boost/tuple/tuple.hpp>
 #include <boost/shared_array.hpp>
+#include <boost/cstdint.hpp>
 
 namespace cryptlite {
 
@@ -47,7 +48,7 @@ class base64 : public boost::noncopyable {
   encode_from_array(const unsigned char* s, std::size_t size) 
   {
     std::ostringstream os;
-    uint8_t c1, c2, c3;
+    boost::uint8_t c1, c2, c3;
     int i = 0;
 
     while (i < size) {

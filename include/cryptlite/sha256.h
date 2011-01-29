@@ -29,6 +29,7 @@ THE SOFTWARE.
 #include <sstream>
 #include <iomanip>
 #include <cryptlite/base64.h>
+#include <boost/cstdint.hpp>
 
 namespace cryptlite {
 
@@ -64,21 +65,21 @@ class sha256 {
   static const unsigned int HASH_SIZE      = 32;
   static const unsigned int HASH_SIZE_BITS = 256;
 
-  static void hash(const std::string& s, uint8_t digest[HASH_SIZE])
+  static void hash(const std::string& s, boost::uint8_t digest[HASH_SIZE])
   {
     sha256 ctx;
-    ctx.input(reinterpret_cast<const uint8_t*>(s.c_str()), s.size());
+    ctx.input(reinterpret_cast<const boost::uint8_t*>(s.c_str()), s.size());
     ctx.result(digest);
   }
 
   static std::string hash_hex(const std::string& s) 
   {
     int i;
-    uint8_t digest[HASH_SIZE];
+    boost::uint8_t digest[HASH_SIZE];
     std::ostringstream oss;
     oss << std::hex << std::setfill('0');
     sha256 ctx;
-    ctx.input(reinterpret_cast<const uint8_t*>(s.c_str()), s.size());
+    ctx.input(reinterpret_cast<const boost::uint8_t*>(s.c_str()), s.size());
     ctx.result(digest);
     for (i = 0; i < HASH_SIZE; ++i)
       oss << std::setw(2) << (digest[i] & 0xff);
@@ -87,9 +88,9 @@ class sha256 {
   }
 
   static std::string hash_base64(const std::string& s) {
-    uint8_t digest[HASH_SIZE];
+    boost::uint8_t digest[HASH_SIZE];
     sha256 ctx;
-    ctx.input(reinterpret_cast<const uint8_t*>(s.c_str()), s.size());
+    ctx.input(reinterpret_cast<const boost::uint8_t*>(s.c_str()), s.size());
     ctx.result(digest);
     return base64::encode_from_array(digest, HASH_SIZE);
   }
@@ -131,12 +132,12 @@ class sha256 {
     intermediate_hash_[7] = 0x5BE0CD19;
   }
 
-  void input(const uint8_t *message_array, unsigned int length)
+  void input(const boost::uint8_t *message_array, unsigned int length)
   {
     assert(message_array);
     if (computed_ || corrupted_ || !length)
         return;
-    uint32_t temp;
+    boost::uint32_t temp;
     while (length-- && !corrupted_) {
       message_block_[message_block_index_++] = (*message_array & 0xFF);
       if (!SHA256_ADD_LENGTH(this, &temp, 8) && (message_block_index_ == BLOCK_SIZE))
@@ -145,16 +146,16 @@ class sha256 {
     }
   }
 
-  void final_bits(const uint8_t message_bits, unsigned int length)
+  void final_bits(const boost::uint8_t message_bits, unsigned int length)
   {
-    uint8_t masks[8] = {
+    boost::uint8_t masks[8] = {
       /* 0 0b00000000 */ 0x00, /* 1 0b10000000 */ 0x80,
       /* 2 0b11000000 */ 0xC0, /* 3 0b11100000 */ 0xE0,
       /* 4 0b11110000 */ 0xF0, /* 5 0b11111000 */ 0xF8,
       /* 6 0b11111100 */ 0xFC, /* 7 0b11111110 */ 0xFE
     };
 
-    uint8_t markbit[8] = {
+    boost::uint8_t markbit[8] = {
       /* 0 0b10000000 */ 0x80, /* 1 0b01000000 */ 0x40,
       /* 2 0b00100000 */ 0x20, /* 3 0b00010000 */ 0x10,
       /* 4 0b00001000 */ 0x08, /* 5 0b00000100 */ 0x04,
@@ -170,12 +171,12 @@ class sha256 {
     if (corrupted_)
       return;
 
-    uint32_t temp;
+    boost::uint32_t temp;
     SHA256_ADD_LENGTH(this, &temp, length);
-    finalize((uint8_t)((message_bits & masks[length]) | markbit[length]));
+    finalize((boost::uint8_t)((message_bits & masks[length]) | markbit[length]));
   }
 
-  void result(uint8_t digest[HASH_SIZE])
+  void result(boost::uint8_t digest[HASH_SIZE])
   {
     assert(digest);
     int i;
@@ -184,19 +185,19 @@ class sha256 {
     if (!computed_)
       finalize(0x80);
     for (i = 0; i < HASH_SIZE; ++i)
-      digest[i] = (uint8_t)(intermediate_hash_[i>>2] >> 8 * (3 - (i & 0x03)));
+      digest[i] = (boost::uint8_t)(intermediate_hash_[i>>2] >> 8 * (3 - (i & 0x03)));
   }
 
 private:
-  uint32_t intermediate_hash_[HASH_SIZE/4];
-  uint32_t length_low_;
-  uint32_t length_high_;
-  int_least16_t message_block_index_;
-  uint8_t message_block_[BLOCK_SIZE];
+  boost::uint32_t intermediate_hash_[HASH_SIZE/4];
+  boost::uint32_t length_low_;
+  boost::uint32_t length_high_;
+  boost::int_least16_t message_block_index_;
+  boost::uint8_t message_block_[BLOCK_SIZE];
   bool computed_;
   bool corrupted_;
 
-  void pad_message(uint8_t pad_byte)
+  void pad_message(boost::uint8_t pad_byte)
   {
     if (message_block_index_ >= (BLOCK_SIZE - 8)) {
       message_block_[message_block_index_++] = pad_byte;
@@ -210,19 +211,19 @@ private:
     while (message_block_index_ < (BLOCK_SIZE - 8))
       message_block_[message_block_index_++] = 0;
 
-    message_block_[56] = (uint8_t)(length_high_ >> 24);
-    message_block_[57] = (uint8_t)(length_high_ >> 16);
-    message_block_[58] = (uint8_t)(length_high_ >> 8);
-    message_block_[59] = (uint8_t)(length_high_);
-    message_block_[60] = (uint8_t)(length_low_ >> 24);
-    message_block_[61] = (uint8_t)(length_low_ >> 16);
-    message_block_[62] = (uint8_t)(length_low_ >> 8);
-    message_block_[63] = (uint8_t)(length_low_);
+    message_block_[56] = (boost::uint8_t)(length_high_ >> 24);
+    message_block_[57] = (boost::uint8_t)(length_high_ >> 16);
+    message_block_[58] = (boost::uint8_t)(length_high_ >> 8);
+    message_block_[59] = (boost::uint8_t)(length_high_);
+    message_block_[60] = (boost::uint8_t)(length_low_ >> 24);
+    message_block_[61] = (boost::uint8_t)(length_low_ >> 16);
+    message_block_[62] = (boost::uint8_t)(length_low_ >> 8);
+    message_block_[63] = (boost::uint8_t)(length_low_);
 
     process_message_block();
   }
 
-  void finalize(uint8_t pad_byte)
+  void finalize(boost::uint8_t pad_byte)
   {
     int i;
     pad_message(pad_byte);
@@ -235,7 +236,7 @@ private:
 
   void process_message_block()
   {
-    static const uint32_t K[64] = {
+    static const boost::uint32_t K[64] = {
       0x428a2f98, 0x71374491, 0xb5c0fbcf, 0xe9b5dba5, 0x3956c25b,
       0x59f111f1, 0x923f82a4, 0xab1c5ed5, 0xd807aa98, 0x12835b01,
       0x243185be, 0x550c7dc3, 0x72be5d74, 0x80deb1fe, 0x9bdc06a7,
@@ -250,74 +251,74 @@ private:
       0x682e6ff3, 0x748f82ee, 0x78a5636f, 0x84c87814, 0x8cc70208,
       0x90befffa, 0xa4506ceb, 0xbef9a3f7, 0xc67178f2
     };
-    uint32_t   temp1, temp2;
-    uint32_t   W[64];
-    uint32_t   A, B, C, D, E, F, G, H;
+    boost::uint32_t   temp1, temp2;
+    boost::uint32_t   W[64];
+    boost::uint32_t   A, B, C, D, E, F, G, H;
 
-    W[0] = (((uint32_t)message_block_[0]) << 24) |
-        (((uint32_t)message_block_[0 + 1]) << 16) |
-        (((uint32_t)message_block_[0 + 2]) << 8) |
-        (((uint32_t)message_block_[0 + 3]));
-    W[1] = (((uint32_t)message_block_[4]) << 24) |
-        (((uint32_t)message_block_[4 + 1]) << 16) |
-        (((uint32_t)message_block_[4 + 2]) << 8) |
-        (((uint32_t)message_block_[4 + 3]));
-    W[2] = (((uint32_t)message_block_[8]) << 24) |
-        (((uint32_t)message_block_[8 + 1]) << 16) |
-        (((uint32_t)message_block_[8 + 2]) << 8) |
-        (((uint32_t)message_block_[8 + 3]));
-    W[3] = (((uint32_t)message_block_[12]) << 24) |
-        (((uint32_t)message_block_[12 + 1]) << 16) |
-        (((uint32_t)message_block_[12 + 2]) << 8) |
-        (((uint32_t)message_block_[12 + 3]));
-    W[4] = (((uint32_t)message_block_[16]) << 24) |
-        (((uint32_t)message_block_[16 + 1]) << 16) |
-        (((uint32_t)message_block_[16 + 2]) << 8) |
-        (((uint32_t)message_block_[16 + 3]));
-    W[5] = (((uint32_t)message_block_[20]) << 24) |
-        (((uint32_t)message_block_[20 + 1]) << 16) |
-        (((uint32_t)message_block_[20 + 2]) << 8) |
-        (((uint32_t)message_block_[20 + 3]));
-    W[6] = (((uint32_t)message_block_[24]) << 24) |
-        (((uint32_t)message_block_[24 + 1]) << 16) |
-        (((uint32_t)message_block_[24 + 2]) << 8) |
-        (((uint32_t)message_block_[24 + 3]));
-    W[7] = (((uint32_t)message_block_[28]) << 24) |
-        (((uint32_t)message_block_[28 + 1]) << 16) |
-        (((uint32_t)message_block_[28 + 2]) << 8) |
-        (((uint32_t)message_block_[28 + 3]));
-    W[8] = (((uint32_t)message_block_[32]) << 24) |
-        (((uint32_t)message_block_[32 + 1]) << 16) |
-        (((uint32_t)message_block_[32 + 2]) << 8) |
-        (((uint32_t)message_block_[32 + 3]));
-    W[9] = (((uint32_t)message_block_[36]) << 24) |
-        (((uint32_t)message_block_[36 + 1]) << 16) |
-        (((uint32_t)message_block_[36 + 2]) << 8) |
-        (((uint32_t)message_block_[36 + 3]));
-    W[10] = (((uint32_t)message_block_[40]) << 24) |
-        (((uint32_t)message_block_[40 + 1]) << 16) |
-        (((uint32_t)message_block_[40 + 2]) << 8) |
-        (((uint32_t)message_block_[40 + 3]));
-    W[11] = (((uint32_t)message_block_[44]) << 24) |
-        (((uint32_t)message_block_[44 + 1]) << 16) |
-        (((uint32_t)message_block_[44 + 2]) << 8) |
-        (((uint32_t)message_block_[44 + 3]));
-    W[12] = (((uint32_t)message_block_[48]) << 24) |
-        (((uint32_t)message_block_[48 + 1]) << 16) |
-        (((uint32_t)message_block_[48 + 2]) << 8) |
-        (((uint32_t)message_block_[48 + 3]));
-    W[13] = (((uint32_t)message_block_[52]) << 24) |
-        (((uint32_t)message_block_[52 + 1]) << 16) |
-        (((uint32_t)message_block_[52 + 2]) << 8) |
-        (((uint32_t)message_block_[52 + 3]));
-    W[14] = (((uint32_t)message_block_[56]) << 24) |
-        (((uint32_t)message_block_[56 + 1]) << 16) |
-        (((uint32_t)message_block_[56 + 2]) << 8) |
-        (((uint32_t)message_block_[56 + 3]));
-    W[15] = (((uint32_t)message_block_[60]) << 24) |
-        (((uint32_t)message_block_[60 + 1]) << 16) |
-        (((uint32_t)message_block_[60 + 2]) << 8) |
-        (((uint32_t)message_block_[60 + 3]));
+    W[0] = (((boost::uint32_t)message_block_[0]) << 24) |
+        (((boost::uint32_t)message_block_[0 + 1]) << 16) |
+        (((boost::uint32_t)message_block_[0 + 2]) << 8) |
+        (((boost::uint32_t)message_block_[0 + 3]));
+    W[1] = (((boost::uint32_t)message_block_[4]) << 24) |
+        (((boost::uint32_t)message_block_[4 + 1]) << 16) |
+        (((boost::uint32_t)message_block_[4 + 2]) << 8) |
+        (((boost::uint32_t)message_block_[4 + 3]));
+    W[2] = (((boost::uint32_t)message_block_[8]) << 24) |
+        (((boost::uint32_t)message_block_[8 + 1]) << 16) |
+        (((boost::uint32_t)message_block_[8 + 2]) << 8) |
+        (((boost::uint32_t)message_block_[8 + 3]));
+    W[3] = (((boost::uint32_t)message_block_[12]) << 24) |
+        (((boost::uint32_t)message_block_[12 + 1]) << 16) |
+        (((boost::uint32_t)message_block_[12 + 2]) << 8) |
+        (((boost::uint32_t)message_block_[12 + 3]));
+    W[4] = (((boost::uint32_t)message_block_[16]) << 24) |
+        (((boost::uint32_t)message_block_[16 + 1]) << 16) |
+        (((boost::uint32_t)message_block_[16 + 2]) << 8) |
+        (((boost::uint32_t)message_block_[16 + 3]));
+    W[5] = (((boost::uint32_t)message_block_[20]) << 24) |
+        (((boost::uint32_t)message_block_[20 + 1]) << 16) |
+        (((boost::uint32_t)message_block_[20 + 2]) << 8) |
+        (((boost::uint32_t)message_block_[20 + 3]));
+    W[6] = (((boost::uint32_t)message_block_[24]) << 24) |
+        (((boost::uint32_t)message_block_[24 + 1]) << 16) |
+        (((boost::uint32_t)message_block_[24 + 2]) << 8) |
+        (((boost::uint32_t)message_block_[24 + 3]));
+    W[7] = (((boost::uint32_t)message_block_[28]) << 24) |
+        (((boost::uint32_t)message_block_[28 + 1]) << 16) |
+        (((boost::uint32_t)message_block_[28 + 2]) << 8) |
+        (((boost::uint32_t)message_block_[28 + 3]));
+    W[8] = (((boost::uint32_t)message_block_[32]) << 24) |
+        (((boost::uint32_t)message_block_[32 + 1]) << 16) |
+        (((boost::uint32_t)message_block_[32 + 2]) << 8) |
+        (((boost::uint32_t)message_block_[32 + 3]));
+    W[9] = (((boost::uint32_t)message_block_[36]) << 24) |
+        (((boost::uint32_t)message_block_[36 + 1]) << 16) |
+        (((boost::uint32_t)message_block_[36 + 2]) << 8) |
+        (((boost::uint32_t)message_block_[36 + 3]));
+    W[10] = (((boost::uint32_t)message_block_[40]) << 24) |
+        (((boost::uint32_t)message_block_[40 + 1]) << 16) |
+        (((boost::uint32_t)message_block_[40 + 2]) << 8) |
+        (((boost::uint32_t)message_block_[40 + 3]));
+    W[11] = (((boost::uint32_t)message_block_[44]) << 24) |
+        (((boost::uint32_t)message_block_[44 + 1]) << 16) |
+        (((boost::uint32_t)message_block_[44 + 2]) << 8) |
+        (((boost::uint32_t)message_block_[44 + 3]));
+    W[12] = (((boost::uint32_t)message_block_[48]) << 24) |
+        (((boost::uint32_t)message_block_[48 + 1]) << 16) |
+        (((boost::uint32_t)message_block_[48 + 2]) << 8) |
+        (((boost::uint32_t)message_block_[48 + 3]));
+    W[13] = (((boost::uint32_t)message_block_[52]) << 24) |
+        (((boost::uint32_t)message_block_[52 + 1]) << 16) |
+        (((boost::uint32_t)message_block_[52 + 2]) << 8) |
+        (((boost::uint32_t)message_block_[52 + 3]));
+    W[14] = (((boost::uint32_t)message_block_[56]) << 24) |
+        (((boost::uint32_t)message_block_[56 + 1]) << 16) |
+        (((boost::uint32_t)message_block_[56 + 2]) << 8) |
+        (((boost::uint32_t)message_block_[56 + 3]));
+    W[15] = (((boost::uint32_t)message_block_[60]) << 24) |
+        (((boost::uint32_t)message_block_[60 + 1]) << 16) |
+        (((boost::uint32_t)message_block_[60 + 2]) << 8) |
+        (((boost::uint32_t)message_block_[60 + 3]));
     W[16] = SHA256_sigma1(W[14]) + W[9] + SHA256_sigma0(W[1]) + W[0];
     W[17] = SHA256_sigma1(W[15]) + W[10] + SHA256_sigma0(W[2]) + W[1];
     W[18] = SHA256_sigma1(W[16]) + W[11] + SHA256_sigma0(W[3]) + W[2];

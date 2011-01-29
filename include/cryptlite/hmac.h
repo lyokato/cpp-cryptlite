@@ -30,6 +30,7 @@ THE SOFTWARE.
 #include <cstring>
 #include <cassert>
 #include <iomanip>
+#include <boost/cstdint.hpp>
 
 namespace cryptlite {
 
@@ -44,7 +45,7 @@ public:
     static void calc(
             const unsigned char* text, int text_len,
             const unsigned char* key,  int key_len,
-            uint8_t digest[HASH_SIZE]) {
+            boost::uint8_t digest[HASH_SIZE]) {
         assert(digest);
         hmac<T> ctx(key, key_len);
         ctx.input(text, text_len);
@@ -54,7 +55,7 @@ public:
     inline static void calc(
             const std::string& text,
             const std::string& key,
-            uint8_t digest[HASH_SIZE]) {
+            boost::uint8_t digest[HASH_SIZE]) {
         assert(digest);
         calc(reinterpret_cast<const unsigned char*>(text.c_str()), text.size(),
              reinterpret_cast<const unsigned char*>(key.c_str()), key.size());
@@ -71,7 +72,7 @@ public:
             const unsigned char* text, int text_len,
             const unsigned char* key,  int key_len ) {
         int i;
-        uint8_t digest[HASH_SIZE];
+        boost::uint8_t digest[HASH_SIZE];
         assert(key);
         assert(text);
         std::ostringstream oss;
@@ -139,11 +140,11 @@ public:
         hasher_.input(text, text_len);
     }
 
-    void final_bits(const uint8_t bits, unsigned int bitcount) {
+    void final_bits(const boost::uint8_t bits, unsigned int bitcount) {
         hasher_.final_bits(bits, bitcount);
     }
 
-    void result(uint8_t digest[HASH_SIZE]) {
+    void result(boost::uint8_t digest[HASH_SIZE]) {
         assert(digest);
         hasher_.result(digest);
         hasher_.reset();
