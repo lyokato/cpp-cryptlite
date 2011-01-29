@@ -16,6 +16,7 @@
 #include <cryptlite/sha1.h>
 #include <cryptlite/sha256.h>
 #include <cryptlite/hmac.h>
+#include <boost/cstdint.hpp>
 
 using namespace cryptlite;
 
@@ -34,7 +35,7 @@ std::size_t len;
 boost::tie(arr, len) = base64::decode_to_array(b64);
 
 // sha1 hash
-uint8_t sha1digest[sha1::HASH_SIZE];
+boost::uint8_t sha1digest[sha1::HASH_SIZE];
 sha1::hash("foobar", sha1digest);
 
 // hex-formatted sha1 hash
@@ -44,7 +45,7 @@ std::string sha1hex = sha1::hash_hex("foobar");
 std::string sha1base64 = sha1::hash_base64("foobar");
 
 // sha256 hash
-uint8_t sha256digest[sha256::HASH_SIZE];
+boost::uint8_t sha256digest[sha256::HASH_SIZE];
 sha256::hash("foobar", sha256digest);
 
 // hex-formatted sha256 hash
@@ -54,14 +55,14 @@ std::string sha256hex = sha256::hash_hex("foobar");
 std::string sha256base64 = sha256::hash_base64("foobar");
 
 // calculate hmac-sha1
-uint8_t hmacsha1digest[sha1::HASH_SIZE];
+boost::uint8_t hmacsha1digest[sha1::HASH_SIZE];
 hmac<sha1>::calc("basestring", "key", hmacsha1digest);
 
 // calculate hex-formatted hmac-sha1
 std::string hmacsha1hex = hmac<sha1>::calc_hex("basestring", "key");
 
 // calculate hmac-sha256
-uint8_t hmacsha256digest[sha256::HASH_SIZE];
+boost::uint8_t hmacsha256digest[sha256::HASH_SIZE];
 hmac<sha256>::calc("basestring", "key", hmacsha256digest);
 
 // calculate hex-formatted hmac-sha256
