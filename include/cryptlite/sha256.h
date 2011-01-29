@@ -242,14 +242,14 @@ private:
     while (message_block_index_ < (BLOCK_SIZE - 8))
       message_block_[message_block_index_++] = 0;
 
-    message_block_[56] = (boost::uint8_t)(length_high_ >> 24);
-    message_block_[57] = (boost::uint8_t)(length_high_ >> 16);
-    message_block_[58] = (boost::uint8_t)(length_high_ >> 8);
-    message_block_[59] = (boost::uint8_t)(length_high_);
-    message_block_[60] = (boost::uint8_t)(length_low_ >> 24);
-    message_block_[61] = (boost::uint8_t)(length_low_ >> 16);
-    message_block_[62] = (boost::uint8_t)(length_low_ >> 8);
-    message_block_[63] = (boost::uint8_t)(length_low_);
+    message_block_[56] = static_cast<boost::uint8_t>(length_high_ >> 24);
+    message_block_[57] = static_cast<boost::uint8_t>(length_high_ >> 16);
+    message_block_[58] = static_cast<boost::uint8_t>(length_high_ >>  8);
+    message_block_[59] = static_cast<boost::uint8_t>(length_high_      );
+    message_block_[60] = static_cast<boost::uint8_t>(length_low_  >> 24);
+    message_block_[61] = static_cast<boost::uint8_t>(length_low_  >> 16);
+    message_block_[62] = static_cast<boost::uint8_t>(length_low_  >>  8);
+    message_block_[63] = static_cast<boost::uint8_t>(length_low_       );
 
     process_message_block();
   }
