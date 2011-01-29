@@ -167,8 +167,28 @@ public:
       return;
     if (!computed_)
       finalize(0x80);
-    for (i = 0; i < HASH_SIZE; ++i)
-      digest[i] = (boost::uint8_t)(intermediate_hash_[i>>2] >> 8 * (3 - (i & 0x03)));
+
+    digest[ 0] = static_cast<boost::uint8_t>(intermediate_hash_[0] >> 24);
+    digest[ 1] = static_cast<boost::uint8_t>(intermediate_hash_[0] >> 16);
+    digest[ 2] = static_cast<boost::uint8_t>(intermediate_hash_[0] >>  8);
+    digest[ 3] = static_cast<boost::uint8_t>(intermediate_hash_[0]      );
+    digest[ 4] = static_cast<boost::uint8_t>(intermediate_hash_[1] >> 24);
+    digest[ 5] = static_cast<boost::uint8_t>(intermediate_hash_[1] >> 16);
+    digest[ 6] = static_cast<boost::uint8_t>(intermediate_hash_[1] >>  8);
+    digest[ 7] = static_cast<boost::uint8_t>(intermediate_hash_[1]      );
+    digest[ 8] = static_cast<boost::uint8_t>(intermediate_hash_[2] >> 24);
+    digest[ 9] = static_cast<boost::uint8_t>(intermediate_hash_[2] >> 16);
+    digest[10] = static_cast<boost::uint8_t>(intermediate_hash_[2] >>  8);
+    digest[11] = static_cast<boost::uint8_t>(intermediate_hash_[2]      );
+    digest[12] = static_cast<boost::uint8_t>(intermediate_hash_[3] >> 24);
+    digest[13] = static_cast<boost::uint8_t>(intermediate_hash_[3] >> 16);
+    digest[14] = static_cast<boost::uint8_t>(intermediate_hash_[3] >>  8);
+    digest[15] = static_cast<boost::uint8_t>(intermediate_hash_[3]      );
+    digest[16] = static_cast<boost::uint8_t>(intermediate_hash_[4] >> 24);
+    digest[17] = static_cast<boost::uint8_t>(intermediate_hash_[4] >> 16);
+    digest[18] = static_cast<boost::uint8_t>(intermediate_hash_[4] >>  8);
+    digest[19] = static_cast<boost::uint8_t>(intermediate_hash_[4]      );
+
   }
 
 private:
