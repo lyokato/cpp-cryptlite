@@ -142,7 +142,7 @@ class sha256 {
       message_block_[message_block_index_++] = (*message_array & 0xFF);
       if (!SHA256_ADD_LENGTH(this, &temp, 8) && (message_block_index_ == BLOCK_SIZE))
         process_message_block();
-      message_array++;
+      ++message_array;
     }
   }
 
