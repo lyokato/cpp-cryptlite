@@ -82,8 +82,9 @@ class base64 : public boost::noncopyable {
     char c1, c2, c3, c4;
     std::size_t size = s.size();
     int i= 0;
+    float dest_guide_size = size * 3 / 4;
 
-    std::size_t reserved = std::ceil(size * 3 / 4);
+    std::size_t reserved = std::ceil(dest_guide_size);
 
     boost::shared_array<unsigned char> dest(new unsigned char[reserved]);
     std::size_t dest_len = 0;
@@ -135,12 +136,13 @@ class base64 : public boost::noncopyable {
     char c1, c2, c3, c4;
     std::size_t size = s.size();
     int i= 0;
+    float dest_guide_size = size * 3 / 4;
 
     dest.clear();
     /*
     dest.reserve(size);
     */
-    std::size_t reserved = std::ceil(size * 3 / 4);
+    std::size_t reserved = std::ceil(dest_guide_size);
     dest.reserve(reserved);
     /*
     unsigned short mod     = reserved % 4;

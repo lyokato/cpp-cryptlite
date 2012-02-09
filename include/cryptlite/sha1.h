@@ -233,9 +233,9 @@ private:
     pad_message(pad_byte);
     for (i = 0; i < BLOCK_SIZE; ++i)
       message_block_[i] = 0;
-    length_low_ = 0;
-    length_high_ = 0;
-    computed_ = true;
+    length_low_         = 0;
+    length_high_        = 0;
+    computed_           = true;
   }
 
   void process_message_block()

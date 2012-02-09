@@ -1,4 +1,7 @@
 Revision history for cryptlite
 
+1.0.1 Thu Feb 9 15:56:00 2012
+    - bugfix: ambiguous std::ceil calling
+
 1.0.0 Sat Jan 22 02:13:27 2011
     - build
