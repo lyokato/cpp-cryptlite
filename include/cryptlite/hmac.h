@@ -43,8 +43,17 @@ public:
     static const unsigned int HASH_SIZE  = T::HASH_SIZE;
 
     static void calc(
-            const unsigned char* text, int text_len,
-            const unsigned char* key,  int key_len,
+            const char* text, int text_len,
+            const char* key,  int key_len,
+            boost::uint8_t digest[HASH_SIZE]) {
+        assert(digest);
+        calc(reinterpret_cast<const boost::uint8_t*>(text), text_len,
+             reinterpret_cast<const boost::uint8_t*>(key), key_len, digest);
+    }
+
+    static void calc(
+            const boost::uint8_t* text, int text_len,
+            const boost::uint8_t* key,  int key_len,
             boost::uint8_t digest[HASH_SIZE]) {
         assert(digest);
         hmac<T> ctx(key, key_len);
@@ -57,20 +66,20 @@ public:
             const std::string& key,
             boost::uint8_t digest[HASH_SIZE]) {
         assert(digest);
-        calc(reinterpret_cast<const unsigned char*>(text.c_str()), text.size(),
-             reinterpret_cast<const unsigned char*>(key.c_str()), key.size());
+        calc(reinterpret_cast<const char*>(text.c_str()), text.size(),
+             reinterpret_cast<const char*>(key.c_str()), key.size(), digest);
     }
 
     inline static std::string calc_hex(
             const std::string& text,
             const std::string& key ) {
-        return calc_hex(reinterpret_cast<const unsigned char*>(text.c_str()), text.size(),
-                reinterpret_cast<const unsigned char*>(key.c_str()), key.size());
+        return calc_hex(reinterpret_cast<const boost::uint8_t*>(text.c_str()), text.size(),
+                reinterpret_cast<const boost::uint8_t*>(key.c_str()), key.size());
     }
 
     static std::string calc_hex(
-            const unsigned char* text, int text_len,
-            const unsigned char* key,  int key_len ) {
+            const boost::uint8_t* text, int text_len,
+            const boost::uint8_t* key,  int key_len ) {
         int i;
         boost::uint8_t digest[HASH_SIZE];
         assert(key);
@@ -86,26 +95,26 @@ public:
         return oss.str();
     }
 
-    hmac(const unsigned char* key, int key_len) : hasher_(T()) {
+    hmac(const boost::uint8_t* key, int key_len) : hasher_(T()) {
         assert(key);
         reset(key, key_len);
     }
 
     hmac(const std::string& key) : hasher_(T()) {
-        reset(reinterpret_cast<const unsigned char*>(key.c_str()), key.size());
+        reset(reinterpret_cast<const boost::uint8_t*>(key.c_str()), key.size());
     }
 
     ~hmac() { }
 
     inline void reset(const std::string& key) {
-        reset(reinterpret_cast<const unsigned char*>(key.c_str()), key.size());
+        reset(reinterpret_cast<const boost::uint8_t*>(key.c_str()), key.size());
     }
 
-    void reset(const unsigned char* key, int key_len) {
+    void reset(const boost::uint8_t* key, int key_len) {
 
         int i;
-        unsigned char k_ipad[BLOCK_SIZE];
-        unsigned char tempkey[HASH_SIZE];
+        boost::uint8_t k_ipad[BLOCK_SIZE];
+        boost::uint8_t tempkey[HASH_SIZE];
 
         assert(key);
 
@@ -132,10 +141,10 @@ public:
     }
 
     inline void input(const std::string& text) {
-        input(reinterpret_cast<const unsigned char*>(text.c_str()), text.size());
+        input(reinterpret_cast<const boost::uint8_t*>(text.c_str()), text.size());
     }
 
-    void input(const unsigned char* text, int text_len) {
+    void input(const boost::uint8_t* text, int text_len) {
         assert(text);
         hasher_.input(text, text_len);
     }
@@ -154,7 +163,7 @@ public:
     }
 
 private:
-    unsigned char k_opad_[BLOCK_SIZE];
+    boost::uint8_t k_opad_[BLOCK_SIZE];
     T hasher_;
 }; // end of class
 
