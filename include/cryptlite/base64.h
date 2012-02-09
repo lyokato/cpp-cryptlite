@@ -48,7 +48,7 @@ class base64 : public boost::noncopyable {
   encode_from_array(const unsigned char* s, std::size_t size) 
   {
     std::ostringstream os;
-    boost::uint8_t c1, c2, c3;
+    unsigned char c1, c2, c3;
     int i = 0;
 
     while (i < size) {
