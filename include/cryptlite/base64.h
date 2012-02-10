@@ -82,7 +82,7 @@ class base64 : public boost::noncopyable {
     char c1, c2, c3, c4;
     unsigned int size = static_cast<unsigned int>(s.size());
     unsigned int i = 0;
-    float dest_guide_size = size * 3 / 4;
+    float dest_guide_size = static_cast<float>(size * 3) / 4;
 
     std::size_t reserved = std::ceil(dest_guide_size);
 
@@ -136,7 +136,7 @@ class base64 : public boost::noncopyable {
     char c1, c2, c3, c4;
     std::size_t size = s.size();
     int i= 0;
-    float dest_guide_size = size * 3 / 4;
+    float dest_guide_size = static_cast<float>(size * 3) / 4;
 
     dest.clear();
     /*
