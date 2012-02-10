@@ -45,11 +45,11 @@ class base64 : public boost::noncopyable {
   }
 
   static std::string 
-  encode_from_array(const boost::uint8_t* s, std::size_t size) 
+  encode_from_array(const boost::uint8_t* s, unsigned int size) 
   {
     std::ostringstream os;
     boost::uint8_t c1, c2, c3;
-    int i = 0;
+    unsigned int i = 0;
 
     while (i < size) {
       c1 = s[i++] & 0xff;
@@ -80,8 +80,8 @@ class base64 : public boost::noncopyable {
   decode_to_array(const std::string& s)
   {
     char c1, c2, c3, c4;
-    std::size_t size = s.size();
-    int i= 0;
+    unsigned int size = static_cast<unsigned int>(s.size());
+    unsigned int i = 0;
     float dest_guide_size = size * 3 / 4;
 
     std::size_t reserved = std::ceil(dest_guide_size);

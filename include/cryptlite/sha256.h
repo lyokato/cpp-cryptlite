@@ -179,7 +179,6 @@ class sha256 {
   void result(boost::uint8_t digest[HASH_SIZE])
   {
     assert(digest);
-    int i;
     if (corrupted_)
       return;
     if (!computed_)
