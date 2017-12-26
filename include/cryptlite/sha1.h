@@ -130,35 +130,6 @@ public:
     }
   }
 
-  void final_bits(const boost::uint8_t message_bits, unsigned int length)
-  {
-    boost::uint8_t masks[8] = {
-      /* 0 0b00000000 */ 0x00, /* 1 0b10000000 */ 0x80,
-      /* 2 0b11000000 */ 0xC0, /* 3 0b11100000 */ 0xE0,
-      /* 4 0b11110000 */ 0xF0, /* 5 0b11111000 */ 0xF8,
-      /* 6 0b11111100 */ 0xFC, /* 7 0b11111110 */ 0xFE
-    };
-    boost::uint8_t markbit[8] = {
-      /* 0 0b10000000 */ 0x80, /* 1 0b01000000 */ 0x40,
-      /* 2 0b00100000 */ 0x20, /* 3 0b00010000 */ 0x10,
-      /* 4 0b00001000 */ 0x08, /* 5 0b00000100 */ 0x04,
-      /* 6 0b00000010 */ 0x02, /* 7 0b00000001 */ 0x01
-    };
-
-    if (!length)
-      return;
-
-    if (computed_ || (length >= 8) || (length == 0))
-      corrupted_ = true;
-
-    if (corrupted_)
-      return;
-
-    boost::uint32_t temp;
-    SHA1_ADD_LENGTH(this, &temp, length);
-    finalize((boost::uint8_t)((message_bits & masks[length])|(markbit[length])));
-  }
-
   void result(boost::uint8_t digest[HASH_SIZE])
   {
     assert(digest);

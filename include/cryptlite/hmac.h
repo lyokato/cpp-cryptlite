@@ -149,10 +149,6 @@ public:
         hasher_.input(text, text_len);
     }
 
-    void final_bits(const boost::uint8_t bits, unsigned int bitcount) {
-        hasher_.final_bits(bits, bitcount);
-    }
-
     void result(boost::uint8_t digest[HASH_SIZE]) {
         assert(digest);
         hasher_.result(digest);
