@@ -34,8 +34,6 @@ THE SOFTWARE.
 namespace cryptlite {
 
 #define SHA256_SHR(bits,word)      ((word) >> (bits))
-#define SHA256_ROTL(bits,word)                         \
-  (((word) << (bits)) | ((word) >> (32-(bits))))
 #define SHA256_ROTR(bits,word)                         \
   (((word) >> (bits)) | ((word) << (32-(bits))))
 
@@ -55,7 +53,6 @@ namespace cryptlite {
 
 #define SHA256_CH(x, y, z)      (((x) & ((y) ^ (z))) ^ (z))
 #define SHA256_MAJ(x, y, z)     (((x) & ((y) | (z))) | ((y) & (z)))
-#define SHA256_PARITY(x, y, z)  ((x) ^ (y) ^ (z))
 
 class sha256 {
 
@@ -146,36 +143,6 @@ class sha256 {
     }
   }
 
-  void final_bits(const boost::uint8_t message_bits, unsigned int length)
-  {
-    boost::uint8_t masks[8] = {
-      /* 0 0b00000000 */ 0x00, /* 1 0b10000000 */ 0x80,
-      /* 2 0b11000000 */ 0xC0, /* 3 0b11100000 */ 0xE0,
-      /* 4 0b11110000 */ 0xF0, /* 5 0b11111000 */ 0xF8,
-      /* 6 0b11111100 */ 0xFC, /* 7 0b11111110 */ 0xFE
-    };
-
-    boost::uint8_t markbit[8] = {
-      /* 0 0b10000000 */ 0x80, /* 1 0b01000000 */ 0x40,
-      /* 2 0b00100000 */ 0x20, /* 3 0b00010000 */ 0x10,
-      /* 4 0b00001000 */ 0x08, /* 5 0b00000100 */ 0x04,
-      /* 6 0b00000010 */ 0x02, /* 7 0b00000001 */ 0x01
-    };
-
-    if (!length)
-      return;
-
-    if (computed_ || (length >= 8) || (length == 0))
-      corrupted_ = true;
-
-    if (corrupted_)
-      return;
-
-    boost::uint32_t temp;
-    SHA256_ADD_LENGTH(this, &temp, length);
-    finalize((boost::uint8_t)((message_bits & masks[length]) | markbit[length]));
-  }
-
   void result(boost::uint8_t digest[HASH_SIZE])
   {
     assert(digest);
@@ -257,8 +224,7 @@ private:
   {
     int i;
     pad_message(pad_byte);
-    for (i = 0; i < BLOCK_SIZE; ++i)
-        message_block_[i] = 0;
+    memset(message_block_, 0, sizeof(message_block_));
     length_low_ = 0;
     length_high_ = 0;
     computed_ = true;

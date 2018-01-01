@@ -30,6 +30,7 @@ THE SOFTWARE.
 #include <cstring>
 #include <cassert>
 #include <iomanip>
+#include <cryptlite/base64.h>
 #include <boost/cstdint.hpp>
 
 namespace cryptlite {
@@ -95,6 +96,26 @@ public:
         return oss.str();
     }
 
+    inline static std::string calc_base64(
+            const std::string& text,
+            const std::string& key ) {
+        return calc_base64(reinterpret_cast<const boost::uint8_t*>(text.c_str()), text.size(),
+                reinterpret_cast<const boost::uint8_t*>(key.c_str()), key.size());
+    }
+
+    static std::string calc_base64(
+            const boost::uint8_t* text, int text_len,
+            const boost::uint8_t* key,  int key_len ) {
+        int i;
+        boost::uint8_t digest[HASH_SIZE];
+        assert(key);
+        assert(text);
+        hmac<T> ctx(key, key_len);
+        ctx.input(text, text_len);
+        ctx.result(digest);
+        return base64::encode_from_array(digest, HASH_SIZE);
+    }
+
     hmac(const boost::uint8_t* key, int key_len) : hasher_(T()) {
         assert(key);
         reset(key, key_len);
@@ -147,10 +168,6 @@ public:
     void input(const boost::uint8_t* text, int text_len) {
         assert(text);
         hasher_.input(text, text_len);
-    }
-
-    void final_bits(const boost::uint8_t bits, unsigned int bitcount) {
-        hasher_.final_bits(bits, bitcount);
     }
 
     void result(boost::uint8_t digest[HASH_SIZE]) {
